@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 
+use App\Task;    // 追加
+
 class TasksController extends Controller
 {
     /**
@@ -47,7 +49,7 @@ class TasksController extends Controller
     public function store(Request $request)
     {
         $task = new Task;
-    　　$task->content = $request->content;
+        $task->content = $request->content;
         $task->save();
 
         // トップページへリダイレクトさせる
