@@ -33,17 +33,6 @@ class TasksController extends Controller
     }
     
     
-    
-    //     // task一覧を取得
-    //     $tasks = Task::all();
-
-    //     // task一覧ビューでそれを表示
-    //     return view('tasks.index', [
-    //         'tasks' => $tasks,
-    //     ]);
-    //     //
-    // }
-
     /**
      * Show the form for creating a new resource.
      *
@@ -52,11 +41,12 @@ class TasksController extends Controller
     public function create()
     {
         $task = new Task;
-        // task作成ビューを表示
+        
+        // タスク作成ビューを表示
         return view('tasks.create', [
             'task' => $task,
         ]);
-        //
+
     }
 
     /**
@@ -74,10 +64,15 @@ class TasksController extends Controller
             'content' => 'required',
         ]);
         
+        // // 認証済みユーザ（閲覧者）の投稿として作成（リクエストされた値をもとに作成）
+        // $request->user()->tasks()->create([
+        //     'status' => $request->status,
+        //     'content' => $request->content,
+        // ]);
         
         $task = new Task;
         $task->user_id = \Auth::id();
-        $task->status = $request->status;    // 追加
+        $task->status = $request->status;
         $task->content = $request->content;
         $task->save();
 
@@ -96,7 +91,6 @@ class TasksController extends Controller
     {
         // idの値でtaskを検索して取得
         $task = Task::findOrFail($id);
-
         // task詳細ビューでそれを表示
         return view('tasks.show', [
             'task' => $task,
@@ -113,7 +107,10 @@ class TasksController extends Controller
     public function edit($id)
     {
         $task = Task::findOrFail($id);
-
+        // 認証済みユーザ（閲覧者）がその投稿の所有者である場合は、投稿を編集
+        if (\Auth::id() === $task->user_id) {
+            $task->edit();
+        }
         // task編集ビューでそれを表示
         return view('tasks.edit', [
             'task' => $task,
@@ -138,11 +135,16 @@ class TasksController extends Controller
         ]);
         //
         $task = Task::findOrFail($id);
+      
+      
         // taskを更新
         $task->status = $request->status;    // 追加
         $task->content = $request->content;
         $task->save();
-
+       
+        if (\Auth::id() === $task->user_id) {
+            $task->update();
+        }
         // トップページへリダイレクトさせる
         return redirect('/');
     }
@@ -157,8 +159,10 @@ class TasksController extends Controller
     {
         // idの値でtaskを検索して取得
         $task = Task::findOrFail($id);
-        // メッセージを削除
-        $task->delete();
+        // 認証済みユーザ（閲覧者）がその投稿の所有者である場合は、投稿を削除
+        if (\Auth::id() === $task->user_id) {
+            $task->delete();
+        }
 
         // トップページへリダイレクトさせる
         return redirect('/');

@@ -6,6 +6,8 @@
 
     <div class="row">
         <div class="col-6">
+            @csrf
+            
             {!! Form::model($task, ['route' => 'tasks.store']) !!}
 
                 <div class="form-group">
